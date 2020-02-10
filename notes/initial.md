@@ -14,31 +14,31 @@ Piazza like thing
 
 # Scenarios:
 
--   &ldquo;As an employer want to make sure that feedback is actually from their employers&rdquo;
--   &ldquo;As an employer i want to get a report of opinions about the company for the
+-   &ldquo;As an employer want to make sure that feedback is actually from their employees&rdquo;
+-   &ldquo;As an employer I want to get a report of opinions about the company for the
     last month&rdquo;
--   &ldquo;As an trade union i want to get anonymous data about problems&rdquo;
--   &ldquo;An an employee i want to be able to, without fear of repricusion,
+-   &ldquo;As an trade union I want to get anonymous data about problems&rdquo;
+-   &ldquo;An an employee I want to be able to, without fear of repricusion,
     complain/feedback an issue in my workplace&rdquo;
--   &ldquo;As an employer i want to ask questions to their fellow employee, i.e &lsquo;do
-    anyone else like the toilets spell like shit&rsquo;&rdquo;
--   &ldquo;As an employee i want to see the problems my coworkers are facing and
+-   &ldquo;As an employer I want to ask questions to their fellow employee, i.e &lsquo;does
+    anyone else think the toilets do not smell good&rsquo;&rdquo;
+-   &ldquo;As an employee I want to see the problems my coworkers are facing and
     possibly vote on them&rdquo;
--   &ldquo;As HR i would like to read problems as well as convert their problems to TODO on
+-   &ldquo;As HR I would like to read problems as well as convert their problems to TODO on
     Jira or Trello etc&rdquo;
--   &ldquo;As HR i want to be able to create a plan of attack&rdquo;
--   &ldquo;As an employee i want to see the status of my problem&rdquo;
--   &ldquo;As management i would like my employees to be happy&rdquo;
--   &ldquo;As management i would like to not get personally attacked&rdquo;
--   &ldquo;As management/HR i would like to list the improvements we&rsquo;ve made / solutions
+-   &ldquo;As HR I want to be able to create a plan of attack&rdquo;
+-   &ldquo;As an employee I want to see the status of my problem&rdquo;
+-   &ldquo;As management I would like my employees to be happy&rdquo;
+-   &ldquo;As management I would like to not get personally attacked&rdquo;
+-   &ldquo;As management/HR I would like to list the improvements we&rsquo;ve made / solutions
     we&rsquo;ve done&rdquo;
--   &ldquo;As an employee i would like to easily see a list of new issues in my
+-   &ldquo;As an employee I would like to easily see a list of new issues in my
     communication platform of choice&rdquo;
--   &ldquo;As an employee/management i would like to comment on issues&rdquo;
--   &ldquo;As an employee i want to be private&rdquo;
--   &ldquo;As user i want it to be easy to use (otherwise i wont bother)&rdquo;
--   &ldquo;As an employer i want to quickly start using this tool&rdquo;
--   &ldquo;As an employer i want to select how people authenticate and signup (i.e with
+-   &ldquo;As an employee/management I would like to comment on issues&rdquo;
+-   &ldquo;As an employee I want to be private&rdquo;
+-   &ldquo;As user I want it to be easy to use (otherwise I won't bother)&rdquo;
+-   &ldquo;As an employer I want to quickly start using this tool&rdquo;
+-   &ldquo;As an employer I want to select how people authenticate and signup (i.e with
     specific email domain or azure etc)&rdquo;
     
     Maybe we shouldn&rsquo;t include trade union.
