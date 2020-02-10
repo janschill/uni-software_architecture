@@ -79,7 +79,7 @@ Piazza like thing
 -   Integrity
 -   Modifiability
 -   Scalability
--   interoperability
+-   Interoperability
 -   Modularity
 -   Customizability
 
