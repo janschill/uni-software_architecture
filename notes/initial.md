@@ -82,6 +82,8 @@ Piazza like thing
 -   Interoperability
 -   Modularity
 -   Customizability
+-   Security
+-   Privacy
 
 
 <a id="org711d126"></a>
