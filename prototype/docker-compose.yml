@@ -5,9 +5,10 @@ networks:
     driver: bridge
 
 services:
+  # Kafka
   zookeeper-server:
     image: "bitnami/zookeeper:latest"
-    networks: 
+    networks:
       - mq-net
     restart: always
     ports:
@@ -17,7 +18,7 @@ services:
 
   kafka-server-1:
     image: "bitnami/kafka:latest"
-    networks: 
+    networks:
       - mq-net
     ports:
       - "9092:9092"
@@ -28,3 +29,26 @@ services:
     depends_on:
       - zookeeper-server
 
+  # Pulsar
+  pulsar-server-1:
+    networks:
+      - mq-net
+    image: "apachepulsar/pulsar:latest"
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    command: >
+      /bin/bash -c
+      "bin/apply-config-from-env.py conf/standalone.conf
+      && bin/pulsar standalone"
+
+  pulsar-dashboard:
+    networks:
+      - mq-net
+    image: apachepulsar/pulsar-dashboard
+    depends_on:
+      - pulsar-server-1
+    ports:
+      - "80:80"
+    environment:
+      - SERVICE_URL=http://standalone:8080
