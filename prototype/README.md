@@ -70,3 +70,24 @@ Sources:
 
 * https://pulsar.apache.org/docs/en/standalone-docker/
 * https://github.com/apache/pulsar/blob/master/docker-compose/standalone-dashboard/docker-compose.yml
+
+### RabbitMQ
+
+With RabbitMQ Management images a similiar dashboard to the one from Pulsar is provided. The dashboard is reachable under: http://localhost:15672/#/ with the login credentials of: `guest` and `guest`.
+
+Default values to connect to the Message Queue server are:
+
+```bash
+hostname: localhost
+username: guest
+password: guest
+port: 5672
+```
+
+Sources:
+
+* https://levelup.gitconnected.com/rabbitmq-with-docker-on-windows-in-30-minutes-172e88bb0808
+
+### CloudAMQP
+
+
