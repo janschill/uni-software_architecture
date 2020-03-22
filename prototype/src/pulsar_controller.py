@@ -1,68 +1,62 @@
 #!/usr/bin/env python3
 from base import Producer, Consumer, Logger, DEFAULT_CHANNEL
+from pulsar import ConsumerType
 import pulsar
 # ONLY works in 3.6
 
-class PulsarNode:
-    def __init__(
-        self, host: str, queue: str = DEFAULT_CHANNEL,
-    ):
-        self.client = pulsar.Client(host)
-        self.consumer = self.client.subscribe(queue, subscription_name=queue)
+done = False
 
+class PulsarNode:
+    def __init__(self, host: str, queue: str = DEFAULT_CHANNEL):
+        pass
 
 class PulsarClearer(PulsarNode):
-    def __init__(
-        self, host: str, queue: str = DEFAULT_CHANNEL,
-    ):
-        self.client = pulsar.Client(host)
-        self.producer = self.client.create_producer(queue)
+    def __init__(self, host: str, queue: str = DEFAULT_CHANNEL):
+        pass
 
     def clear_queue(self, queue: str = DEFAULT_CHANNEL) -> None:
-        self.consumer.queue_delete(queue=queue)
-
+        pass
 
 class PulsarProducer(Producer):
-    """
-    RabbitMQProducer produces test messages and sends it to RabbitMQ via the `start` function.
-    """
-
-    def __init__(
-        self, host: str, queue: str = DEFAULT_CHANNEL,
-    ):
-        self.client = pulsar.Client(host)
-        self.producer = self.client.create_producer(queue)
+    def __init__(self, host: str, queue: str = DEFAULT_CHANNEL):
+        self.client = pulsar.Client("pulsar://127.0.0.1:6650")
+        self.producer = self.client.create_producer('my-topic', batching_enabled=False)
 
     def send(self, msg: str) -> None:
-        self.producer.send_async(msg.encode("utf-8"))
-
+        self.producer.send(msg.encode("utf-8"))
 
 class PulsarConsumer(Consumer):
-    """
-    RabbitMQProducer consumes test messages and sends it to RabbitMQ via the `start` function.
-    It will then simulate having to do an amount of work before popping a new message
-    """
-
-    def __init__(
-        self, host: str, queue: str = DEFAULT_CHANNEL,
-    ):
-        self.client = pulsar.Client(host)
-        self.consumer = self.client.create_reader(queue, subscription_name=queue)
+    def __init__(self, host: str, queue: str = DEFAULT_CHANNEL):
+        self.client = pulsar.Client("pulsar://127.0.0.1:6650")
+        self.consumer = self.client.subscribe('my-topic', 'my-subscription', consumer_type=ConsumerType.Shared)
 
     def run(self):
+        global done
+
         while True:
-            msg = self.consumer.receive()
-            self.callback(msg)
-            self.consumer.acknowledge(msg)
+            try:
+                msg = self.consumer.receive(timeout_millis=1000)
+                
+                try:
+                    self.callback(msg.data())
+                    self.consumer.acknowledge(msg)
+                except:
+                    self.consumer.negative_acknowledge(msg)
+            except:
+                break
 
+        self.consumer.close()
+        self.client.close()
+        done = True
 
-class PulsarLogger(Logger):
-    """
-    RabbitMQProducer produces test messages and sends it to RabbitMQ via the `start` function.
-    """
-
+class PulsarLogger(PulsarNode, Logger):
     def queue_length(self) -> int:
-        return -1
+        global done, count
+
+        if done == True:
+            return 0
+        else:
+            return 1
 
 
 KLASS_TUPLE = (PulsarProducer, PulsarConsumer, PulsarLogger, PulsarClearer)
