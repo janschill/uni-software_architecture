@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-
-
 from base import Producer, Consumer, Logger, DEFAULT_CHANNEL
 import pulsar
-
+# ONLY works in 3.6
 
 class PulsarNode:
     def __init__(
@@ -13,7 +11,7 @@ class PulsarNode:
         self.consumer = self.client.subscribe(queue, subscription_name=queue)
 
 
-class RabbitMQClearer(PulsarNode):
+class PulsarClearer(PulsarNode):
     def __init__(
         self, host: str, queue: str = DEFAULT_CHANNEL,
     ):
@@ -24,7 +22,7 @@ class RabbitMQClearer(PulsarNode):
         self.consumer.queue_delete(queue=queue)
 
 
-class RabbitMQProducer(Producer):
+class PulsarProducer(Producer):
     """
     RabbitMQProducer produces test messages and sends it to RabbitMQ via the `start` function.
     """
@@ -36,10 +34,10 @@ class RabbitMQProducer(Producer):
         self.producer = self.client.create_producer(queue)
 
     def send(self, msg: str) -> None:
-        self.producer.send(msg.encode("utf-8"))
+        self.producer.send_async(msg.encode("utf-8"))
 
 
-class RabbitMQConsumer(Consumer, PulsarNode):
+class PulsarConsumer(Consumer):
     """
     RabbitMQProducer consumes test messages and sends it to RabbitMQ via the `start` function.
     It will then simulate having to do an amount of work before popping a new message
@@ -49,7 +47,7 @@ class RabbitMQConsumer(Consumer, PulsarNode):
         self, host: str, queue: str = DEFAULT_CHANNEL,
     ):
         self.client = pulsar.Client(host)
-        self.consumer = client.subscribe("my-topic", subscription_name="my-sub")
+        self.consumer = self.client.create_reader(queue, subscription_name=queue)
 
     def run(self):
         while True:
@@ -58,13 +56,13 @@ class RabbitMQConsumer(Consumer, PulsarNode):
             self.consumer.acknowledge(msg)
 
 
-class RabbitMQLogger(PulsarNode, Logger):
+class PulsarLogger(Logger):
     """
     RabbitMQProducer produces test messages and sends it to RabbitMQ via the `start` function.
     """
 
     def queue_length(self) -> int:
-        return 0
+        return -1
 
 
-KLASS_TUPLE = (RabbitMQProducer, RabbitMQConsumer, RabbitMQLogger, RabbitMQClearer)
+KLASS_TUPLE = (PulsarProducer, PulsarConsumer, PulsarLogger, PulsarClearer)

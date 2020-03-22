@@ -1,0 +1,17 @@
+
+version: '3.3'
+
+networks:
+  mq-net:
+    driver: bridge
+
+services:
+
+  # RabbitMQ
+  rabbitmq-server-1:
+    networks:
+      - mq-net
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"

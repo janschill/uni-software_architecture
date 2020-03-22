@@ -7,9 +7,10 @@ https://www.rabbitmq.com/tutorials/tutorial-three-python.html
 """
 
 
-from base import Producer, Consumer, Logger, DEFAULT_CHANNEL
+from base import Producer, Consumer, Logger, Clearer, DEFAULT_CHANNEL
 from typing import Callable, Dict, Any
 import pika
+import sys
 
 
 class RabbitMQNode:
@@ -20,15 +21,16 @@ class RabbitMQNode:
         queue_kwargs: Dict[str, Any] = {},
     ):
         self.host = host
+
         self.queue_name = queue
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host))
+        self.connection = pika.BlockingConnection(pika.URLParameters(host))
         self.channel = self.connection.channel()
         self.queue = self.channel.queue_declare(queue=queue, **queue_kwargs)
 
 
-class RabbitMQClearer(RabbitMQNode):
-    def clear_queue(self, queue: str = DEFAULT_CHANNEL) -> None:
-        self.channel.queue_delete(queue=queue)
+class RabbitMQClearer(RabbitMQNode, Clearer):
+    def clear_queue(self) -> None:
+        self.channel.queue_delete(queue=self.queue_name)
 
 
 class RabbitMQProducer(Producer, RabbitMQNode):
@@ -59,7 +61,6 @@ class RabbitMQConsumer(Consumer, RabbitMQNode):
             if method:
                 self.channel.basic_ack(delivery_tag=method.delivery_tag)
             else:
-                print("\nhuh")
                 break
 
         self.channel.close()
