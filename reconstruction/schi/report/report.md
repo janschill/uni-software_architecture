@@ -44,13 +44,244 @@ Useful viewpoints to make sense of the data would be:
 - A node, edge graph showing the dependency between components
 - The same graphs can be used to show modifications on files over time
 
+<!-- TODO: explain the views, All these -->
+
 ## Data gathering
 
-In order to gather relevant information to answer the list of questions and ultimately solve the above stated problem, the Python language will be used.
+In order to gather relevant information to answer the list of questions and ultimately solve the above stated problem, the Python language will be used with a few useful libraries to make the extraction of data easier.
+For the problem to solve two different sources of data will be used. Firstly the actual source code of Rails will be used and analysed, secondly the Git history will be looked at.
+The source code for Rails is hosted on GitHub and can be easily cloned. With a clone the source code will be made available locally and additionally a hidden folder `.git` is created and populated, which holds all Git relavant data---also the history, that will used. Therefore, a clone of the repository make all data needed available.
+
+```bash
+$ git clone git@github.com:rails/rails.git
+```
+
+### Reconstruction
+
+As before mentioned all components are in the root directory of the repository. The first step to see what components are available and load them into memory:
+
+```python
+directories = []
+for (dirpath, dirnames, filenames) in walk('/path/to/rails'):
+    directories.extend(dirnames)
+    break
+directories = list(filter(lambda x: x[0] != ".", directories)) # filter away all hidden directories
+```
+
+A look inside one of those directories will give an overview of what a component actually is.
+There has been a standard format established for the development of small libraries in the Ruby programming language. These libraries are called __gems__ and most often contain the following files:
+
+- `lib/`: contains the source code
+- `test/` or `spec/`: for the test files
+- `Rakefile`: uses Rake to automate tasks, like testing, generating code
+- `bin/`: includes executables and is loaded into the user's `PATH`
+- `README.md`: for a descriptive text about the gem
+- `*.gemspec`: holding general information, like author, version, external dependencies etc.
+
+[What is a gem? – Guides RubyGems](https://guides.rubygems.org/what-is-a-gem/)
+
+The directories give a good way to group and seperate the information gathered by gem, as the information extraction can just be done on the directories after each other and stored in a suitable data structure and as they are all in the same format adds to the convenience.
+
+Rails components:
+
+- `actioncable`
+- `actionmailbox`
+- `actionmailer`
+- `actionpack`
+- `actiontext`
+- `actionview`
+- `activejob`
+- `activemodel`
+- `activerecord`
+- `activestorage`
+- `activesupport`
+- `railties`
+
+The project does not only include the Rails components but also other directories:
+
+- `ci`
+- `guides`
+- `tasks`
+- `tools`
+
+These will be iterated and every file will be looked at.
+
+```python
+def get_files(path, file_extension):
+    files = Path(path).rglob("*." + file_extension)
+    meta_data_files = {}
+    for file in files:
+        meta_data_files[str(file)] = {
+            'filename': str(file),
+            'no_lines': number_of_lines(file),
+            'no_functions': number_of_functions(file),
+            'no_modules': number_of_modules(file),
+            'no_requires': len(extract_require(file)),
+            'functions': extract_functions(file),
+            'requires': extract_require(file),
+            'namespaces': extract_namespace(file),
+            'autoloads': extract_autoload(file)
+        }
+    return meta_data_files
+```
+
+This loop will be called on the project root and given the Ruby file extension `rb`, to only look at Ruby files. This will count the number of lines, functions, modules, requires.
+Modules can be counted by extracting on the key word `module`, it is used in Ruby to indicate a files namespace, which will then be used to import it into a different file. It is useful for grouping code that belongs together.
+
+```ruby
+module Mathematics
+  module NumberTheory
+    module Arithmetic
+      def self.add(a, b)
+        return a + b
+      end
+    end
+  end
+  module Geometry
+  end
+end
+
+# Mathematics.NumberTheory.Arithmetic.add(1, 2) => 3
+```
+
+Using the `require` function is a way of importing files into the file that it is being called from. This is a good way of checking how many dependencies a file has to other files---showing possible complexity. There is one problem though: Rails, does not use this way of importing its own dependencies. What Rails does is, it uses an `autoload` function, that finds it in the path and loads it into the context of the library by having the class/file name passed to it.
+
+```ruby
+module ActionView
+  # …
+  autoload :Base # loads the file base.rb
+  # …
+end
+```
+
+This can be extracted and used to show what kind of files are being loaded on startup of the library and needed __globally__ for the library.
+
+Further, the functions will be extracted. This list will hold a tuple of the function name and the line count.
+
+A key function in the retrieval is this `extract_from_line` function. It will get a key word that it supposed to find on the provided line.
+Regular expressions are used to find the key word and the wanted data, like the function name.
+
+```python
+def extract_from_line(name, line):
+    if re.search("^([\s]*#)", line): # ignore comments
+        return None
+    elif name == 'def|end':
+        method = re.search("^([\s]*(def |end)[ (\S+)]*)", line)
+        return str(method.group(1)) if method else None
+    elif name == 'module|class|end':
+        namespace = re.search("^([\s]*(module|class|end)[ (\S+)]*)", line)
+        return str(namespace.group(1)) if namespace else None
+    else:
+        x = re.search("" + name + " (\S+)", line)
+        return None if x == None else str(x.group(1))
+```
+
+Because Ruby's syntax does not use any symbols indicating a block, but uses the off-side rule, just like Python, it is a bit trickier to extract functions and therefore, the code to do that is provided in the following listing.
+
+```python
+def extract_functions(file):
+    functions = []
+    line_count = 1
+    current_function_name = ''
+    def_identation = -1
+    for ext in extract(file, 'def|end', True):
+        # If ext is None, it means it did not find a nested def or
+        # an ending to the function, thus incrementing
+        if ext == None:
+            line_count += 1
+        else:
+            identation = len(ext) - len(ext.lstrip(' '))
+            # Single line function
+            if 'def ' in ext and ' end' in ext:
+                current_function_name = retrieve_function_name(ext)
+                functions.append(add_function(current_function_name, 1))
+            # Beginning of new function
+            elif 'def ' in ext:
+                def_identation = identation
+                line_count = 0
+                current_function_name = retrieve_function_name(ext)
+            # Function ending
+            elif 'end' in ext and identation == def_identation:
+                functions.append(add_function(current_function_name, line_count))
+                current_function_name = ''
+                line_count = 1
+            else:
+                line_count += 1
+    return functions
+```
+
+This function extracts every line from a file and checks what key word is present, based on that it will either start a new function, end one or just increment its line count.
+
+The initial `get_files` function is being called when instantiating the `rails_components` object.
+
+```python
+rails_components = {}
+for directory in directories:
+    files = get_files(full_path('/' + directory + '/'), 'rb')
+    average_LOC = int(reduce_by_key(files.values(), 'no_lines') / len(files.values()))
+    average_NOF = int(reduce_by_key(files.values(), 'no_functions') / len(files.values()))
+    average_requires = int(reduce_by_key(files.values(), 'no_requires') / len(files.values()))
+    dependencies = get_external_dependencies(directory)
+    rails_components[directory] = {
+        'files': files,
+        'average_LOC': average_LOC,
+        'average_NOF': average_NOF,
+        'average_requires': average_requires,
+        'dependencies': dependencies }
+rails_components = {k: v for k, v in sorted(rails_components.items(), key = lambda item: item[0])}
+```
+
+This will also add some general information, based on the gathered information about each individual component.
+
+### Evolutionary
 
 
+
+All the information gathered in both processes will be plotted either by using basic `prints` in a tabulated format or plotted by using `networkx` and `matplotlib`.
 
 ## Knowledge inference
+
+| Component       | Ruby files | Ø LOC   | Ø Functions | Ø Requires | Dependencies |
+|-----------------|------------|---------|-------------|------------|--------------|
+| activerecord    | 853        | 160     | 12          | 1          | 2            |
+| activesupport   | 469        | 119     | 10          | 1          | 5            |
+| actionpack      | 325        | 202     | 16          | 1          | 6            |
+| railties        | 278        | 148     | 9           | 3          | 5            |
+| actionview      | 186        | 231     | 18          | 1          | 5            |
+| activemodel     | 130        | 118     | 8           | 1          | 1            |
+| activestorage   | 124        | 62      | 3           | 1          | 5            |
+| activejob       | 118        | 70      | 4           | 1          | 2            |
+| actionmailbox   | 93         | 34      | 1           | 0          | 6            |
+| actioncable     | 86         | 79      | 6           | 1          | 4            |
+| actiontext      | 74         | 35      | 2           | 0          | 5            |
+| actionmailer    | 41         | 140     | 9           | 1          | 6            |
+| guides          | 22         | 69      | 3           | 3          | 0            |
+| tools           | 2          | 21      | 1           | 4          | 0            |
+| ci              | 1          | 22      | 0           | 2          | 0            |
+| tasks           | 1          | 323     | 5           | 6          | 0            |
+
+__Figure 1 All Rails directories broken down by file__
+
+| Component       | LOC    | NOF   |
+|-----------------|--------|-------|
+| activerecord    | 136860 | 10949 |
+| actionpack      | 65919  | 5289  |
+| activesupport   | 56011  | 4714  |
+| actionview      | 43045  | 3474  |
+| railties        | 41328  | 2653  |
+| activemodel     | 15441  | 1071  |
+| activejob       | 8265   | 559   |
+| activestorage   | 7710   | 389   |
+| actioncable     | 6846   | 535   |
+| actionmailer    | 5742   | 369   |
+| actionmailbox   | 3170   | 144   |
+| actiontext      | 2625   | 174   |
+| guides          | 1534   | 87    |
+| tasks           | 323    | 5     |
+| tools           | 43     | 2     |
+| ci              | 22     | 0     |
+
+__Figure 2 All Rails directories broken down by their total LOC and NOF__
 
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
 
