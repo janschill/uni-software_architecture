@@ -231,15 +231,113 @@ for directory in directories:
 rails_components = {k: v for k, v in sorted(rails_components.items(), key = lambda item: item[0])}
 ```
 
-This will also add some general information, based on the gathered information about each individual component.
+This will also add some general information, based on the gathered information about each individual component. Especially `dependencies` is of interested. The `.gemspec` file holds all the external gems that the current library depends on. This can be used to see how large the external complexity for the specific library is.
 
 ### Evolutionary
 
+`PyDriller` exposes a class called `RepositoryMining`, that comes in handy when analysing a repository project.
 
+```python
+@functools.lru_cache(maxsize=None) # Memoize result for inputs
+def count_file_modifications_simple(path, tag):
+    commit_counts = defaultdict(int)
+    for commit in RepositoryMining(path, from_tag=tag).traverse_commits():
+        for modification in commit.modifications:
+            try:
+                commit_counts[modification.new_path] += 1
+            except:
+                pass
+    return commit_counts
+```
 
-All the information gathered in both processes will be plotted either by using basic `prints` in a tabulated format or plotted by using `networkx` and `matplotlib`.
+This function `count_file_modifications_simple` will count occurences of a file in the commit history, giving a good overview of the number of times a file has been changed over its history.
+This implementation has the problem that it does not differentiate between, pure changes, deletion or additions of files. In order to handle these cases the modification object gives access to: `old_path` and `new_path`.
+
+```python
+# cc = {
+#   'filename': occurrences in commit history,
+#   'actionmailer/lib/action_mailer.rb': 113
+# }
+def handle_change_type(cc, commit, modification):
+    new_path = modification.new_path
+    old_path = modification.old_path
+    try:
+        # Change old_path to new_path, keep values
+        if modification.change_type == ModificationType.RENAME:
+            cc_old = cc.get(old_path, (0, []))
+            cc[new_path] =  (cc_old[0] + 1, cc_old[1])
+            cc.pop(old_path)
+        elif modification.change_type == ModificationType.DELETE:
+            cc.pop(old_path, '')
+        elif modification.change_type == ModificationType.ADD:
+            cc[new_path] = (1, [])
+        else: # Modification to existing file
+            count, cx = cc[old_path]
+            comp = modification.complexity
+            cc[old_path] = (count + 1, cx + [comp] if comp else cx)
+    except Exception as e:
+        pass
+```
+
+Another interesting metric is the complexity of a modifitaion. This is also recorded on most of the modifications and is realized as the [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity).
+
+Logical coupling can be used to detect modules that may depend on each other based on their frequency of change in the same commit. One can assume when two Rails components occur in the commit history often together that they depend on each other. This is of course no true indication like an actual dependency graph would give, but still valuable as it could give indications on dependencies that are not shown on dependency graphs generated from static analysis.
+
+To couple the individual Rails components, firstly the components have to defined. This can be done manually as they do not change frequently and can be easily adapted when something gets added or removed.
+
+```python
+def rails_components():
+    return [
+        'activerecord', 'activesupport',
+        'actionpack', 'railties',
+        'actionview', 'activemodel',
+        'activestorage', 'activejob',
+        'actionmailbox', 'actioncable',
+        'actiontext', 'actionmailer'
+    ]
+```
+
+The original function that counts the change occurences of files can be reused, because it already loops over every commit and modification, so no reason to do it again.
+
+```python
+rails_components_dictionary = rails_components_dict()
+
+# Returns the Rails component from the path
+# actionmailer/lib/action_mailer.rb -> actionmailer
+def changed_component(modification):
+  return modification.old_path.rsplit('/')[0] or modification.new_path.rsplit('/')[0]
+
+# cc = {
+#   'filename': (occurrences in commit history, complexities),
+#   'actionmailer/lib/action_mailer.rb': (113, [1,1,1,…]
+# }
+def logical_coupling(path):
+    cc = defaultdict(lambda: (0, []))
+    for commit in RepositoryMining(path).traverse_commits():
+        # Holds all components that were touched in commit
+        changed_components = []
+        for modification in commit.modifications:
+            # Holds changed component
+            comp = changed_component(modification)
+            # Check if it is a Rails component change
+            if comp in rails_components():
+                changed_components.append(comp)
+            # Was the try-block in the previous version
+            handle_change_type(cc, commit, modification)
+        # Adds all changed components, but itself to the dictionary
+        add_other_components(rails_components_dictionary, changed_components)
+        # Reset the changed components for each commit
+        changed_components = []
+
+    return cc
+```
+
+All the information gathered in both processes will be plotted either by using basic `print` in a tabulated format or plotted by using `networkx` and `matplotlib`.
 
 ## Knowledge inference
+
+
+
 
 | Component       | Ruby files | Ø LOC   | Ø Functions | Ø Requires | Dependencies |
 |-----------------|------------|---------|-------------|------------|--------------|
