@@ -368,9 +368,13 @@ def print_rails_components():
 | actiontext     | 74         | 35      | 2           | 2              | 0          | 5           |
 | actionmailer   | 41         | 140     | 9           | 3              | 1          | 6           |
 
+__Figure 1: All Rails components broken down by file__
+
 To have an even clearer visual representation of the distribution of all the files in Rails a pie chart can be used.
 
-__Figure 1 All Rails components broken down by file__
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-number_of_files-pie.png)
+
+__Figure 2: Pie chart distribution by number of Ruby files__
 
 | Component       | LOC    | NOF   |
 |-----------------|--------|-------|
@@ -387,10 +391,25 @@ __Figure 1 All Rails components broken down by file__
 | actionmailbox   | 3170   | 144   |
 | actiontext      | 2625   | 174   |
 
-__Figure 2 All Rails directories broken down by their total LOC and NOF__
+__Figure 3: All Rails directories broken down by their total LOC and NOF__
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-components-loc-bar.png)
+
+__Figure 4: Bar distribution of the LOC by Rails component__
+
 
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
 
 ## Information interpretation
 
+
+
 ## Conclusion
+
+The reconstruction of Rails framework using the Symphony approach has been more or less successful. Doing the reconstruction with the purpose of gaining insights without working with stakeholders or system experts was not completely Sympohny conform, but did not block the process of the reconstruction. The reconstruction was though somewhat blocked by not being able to extract classes from the files in the Rails project. The reason for not being successful in this regard is that it was not trivial to extract the correct namespaces and classes of a file, as Ruby uses the off-side rule and modules are only used for namespacing code and the class key word then actual indicates if the file contains a class. If that would have been successful the next challenge would have been to find the dependencies of the classes to others, usually Ruby uses `require` to load files. Rails on the other hand has a function `autoload`, which has multiple implementation to support eagar loading for example. This `autoload` function is smart enough to find the correct file, by only giving it the class name. The usage of this class then would need to be tracked in all files, in order to construct a class diagram. This is very unfortunate and a lot of time was spent to first understand this and then find a solution.
+The final solution to use a dependency graph between the different Rails components, based on their loading from the `.gemspec` file was still satisfiable to some degree.
+The knowledge aquired through the static analysis of the complexity of the different components yielded great results as it shows, which of the components are complex and experience a lot of work, based on the number of modifications on them.
+The modifications found from the evaluation in the evolutionary analysis of the git history was also valuable.
+Firstly, as just mentioned, the visible number of modifications on the components, but also their average complexity let to believe that some components are more complicated as others.
+Secondly figuring out through logical coupling that some components change rather often together shows how tightly the framework is coupled together, even though it might not seem in the beginning from the lack of dependency on each other.
+
