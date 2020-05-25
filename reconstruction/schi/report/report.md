@@ -19,23 +19,27 @@ This report aims at giving a programmatic overview of the Rails framework. It wi
 <!-- What architectural information is needed to solve the problem? -->
 <!-- Which viewpoints are relevant? -->
 
-Before gathering the data from the codebase it is important to define the architectural information that is needed to solve the stated problem of gaining a better overview and understanding of Rails.
+Before gathering the data from the codebase, it is important to define the architectural information that is needed to solve the stated problem of gaining a better overview and understanding of Rails.
 It is also benefical to set the viewpoints that are planned to use to show the gathered information.
 
-From previous studies of Rails, like reading the documentation or looking at the root directory of the repository, it is clear that there are several components that form Rails. Good explanations what those individual comoponents do can be found in the documation. Something that would be useful to know is though:
+From previous studies of Rails, reading the documentation or looking at the root directory of the repository, it is clear that there are several components that form Rails. Good explanations what those individual components do, can be found in the official Rails documation. Other information that would be useful that is not stated in the documentation:
 
 - How complex are these components?
 - How are the components connected to each other?
 - How active is the development on them?
+- What components experience change at the same time?
 
 The concrete information that should be gathered is something like:
 
 - Number of files in component
 - Lines of code per file, per component
 - Functions per file
+- Function length
 - External dependencies per component
 - Usuage between Rails components
 - Commits with their modification to files/component
+- Modification complexity
+- Logical coupling of the components
 
 Useful viewpoints to make sense of the data would be:
 
@@ -336,29 +340,37 @@ All the information gathered in both processes will be plotted either by using b
 
 ## Knowledge inference
 
+In this step the low-level information gathered shall be abstracted to ease its readability. This will be done by mapping the information to the selected views.
 
+Printing some initial statistics about the Rails components with the `print` and `format` function.
 
+```python
+def print_rails_components():
+    format = "{:<15}{:<1}{:<10}{:<1}{:<7}{:<1}{:<11}{:<1}{:<14}{:<1}{:<10}{:<1}{:<10}"
+    print(format.format("Component", " | ", "Ruby files", " | ", "Ø LOC", " | ", "Ø Functions", " | ", "Ø Function LOC", " | ", "Ø Requires", " | ", "Dependencies"))
+    print('----------------+------------+---------+-------------+----------------+------------+-------------')
+    for k, v in rails_components.items():
+        print(format.format(k, ' | ' , len(v['files']), ' | ', v['average_LOC'], ' | ', v['average_NOF'], ' | ', v['average_function_LOC'], ' | ', v['average_requires'], ' | ', len(v['dependencies'])))
+```
 
-| Component       | Ruby files | Ø LOC   | Ø Functions | Ø Requires | Dependencies |
-|-----------------|------------|---------|-------------|------------|--------------|
-| activerecord    | 853        | 160     | 12          | 1          | 2            |
-| activesupport   | 469        | 119     | 10          | 1          | 5            |
-| actionpack      | 325        | 202     | 16          | 1          | 6            |
-| railties        | 278        | 148     | 9           | 3          | 5            |
-| actionview      | 186        | 231     | 18          | 1          | 5            |
-| activemodel     | 130        | 118     | 8           | 1          | 1            |
-| activestorage   | 124        | 62      | 3           | 1          | 5            |
-| activejob       | 118        | 70      | 4           | 1          | 2            |
-| actionmailbox   | 93         | 34      | 1           | 0          | 6            |
-| actioncable     | 86         | 79      | 6           | 1          | 4            |
-| actiontext      | 74         | 35      | 2           | 0          | 5            |
-| actionmailer    | 41         | 140     | 9           | 1          | 6            |
-| guides          | 22         | 69      | 3           | 3          | 0            |
-| tools           | 2          | 21      | 1           | 4          | 0            |
-| ci              | 1          | 22      | 0           | 2          | 0            |
-| tasks           | 1          | 323     | 5           | 6          | 0            |
+| Component      | Ruby files | Ø LOC   | Ø Functions | Ø Function LOC | Ø Requires | Dependencies|
+|----------------|------------|---------|-------------|----------------|------------|-------------|
+| activerecord   | 853        | 160     | 12          | 3              | 1          | 2           |
+| activesupport  | 469        | 119     | 10          | 4              | 1          | 5           |
+| actionpack     | 325        | 202     | 16          | 4              | 1          | 6           |
+| railties       | 278        | 148     | 9           | 4              | 3          | 5           |
+| actionview     | 186        | 231     | 18          | 3              | 1          | 5           |
+| activemodel    | 130        | 118     | 8           | 4              | 1          | 1           |
+| activestorage  | 124        | 62      | 3           | 1              | 1          | 5           |
+| activejob      | 118        | 70      | 4           | 2              | 1          | 2           |
+| actionmailbox  | 93         | 34      | 1           | 2              | 0          | 6           |
+| actioncable    | 86         | 79      | 6           | 3              | 1          | 4           |
+| actiontext     | 74         | 35      | 2           | 2              | 0          | 5           |
+| actionmailer   | 41         | 140     | 9           | 3              | 1          | 6           |
 
-__Figure 1 All Rails directories broken down by file__
+To have an even clearer visual representation of the distribution of all the files in Rails a pie chart can be used.
+
+__Figure 1 All Rails components broken down by file__
 
 | Component       | LOC    | NOF   |
 |-----------------|--------|-------|
@@ -374,10 +386,6 @@ __Figure 1 All Rails directories broken down by file__
 | actionmailer    | 5742   | 369   |
 | actionmailbox   | 3170   | 144   |
 | actiontext      | 2625   | 174   |
-| guides          | 1534   | 87    |
-| tasks           | 323    | 5     |
-| tools           | 43     | 2     |
-| ci              | 22     | 0     |
 
 __Figure 2 All Rails directories broken down by their total LOC and NOF__
 
