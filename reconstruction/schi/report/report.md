@@ -73,7 +73,7 @@ directories = list(filter(lambda x: x[0] != ".", directories)) # filter away all
 ```
 
 A look inside one of those directories will give an overview of what a component actually is.
-There has been a standard format established for the development of small libraries in the Ruby programming language. These libraries are called __gems__ and most often contain the following files:
+There has been a standard format established for the development of small libraries in the Ruby programming language. These libraries are called *gems* and most often contain the following files:
 
 - `lib/`: contains the source code
 - `test/` or `spec/`: for the test files
@@ -158,7 +158,7 @@ module ActionView
 end
 ```
 
-This can be extracted and used to show what kind of files are being loaded on startup of the library and needed __globally__ for the library.
+This can be extracted and used to show what kind of files are being loaded on startup of the library and needed *globally* for the library.
 
 Further, the functions will be extracted. This list will hold a tuple of the function name and the line count.
 
@@ -368,13 +368,13 @@ def print_rails_components():
 | actiontext     | 74         | 35      | 2           | 2              | 0          | 5           |
 | actionmailer   | 41         | 140     | 9           | 3              | 1          | 6           |
 
-__Figure 1: All Rails components broken down by file__
+*Figure 1: All Rails components broken down by file*
 
 To have an even clearer visual representation of the distribution of all the files in Rails a pie chart can be used.
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-number_of_files-pie.png)
 
-__Figure 2: Pie chart distribution by number of Ruby files__
+*Figure 2: Pie chart distribution by number of Ruby files*
 
 | Component       | LOC    | NOF   |
 |-----------------|--------|-------|
@@ -391,18 +391,40 @@ __Figure 2: Pie chart distribution by number of Ruby files__
 | actionmailbox   | 3170   | 144   |
 | actiontext      | 2625   | 174   |
 
-__Figure 3: All Rails directories broken down by their total LOC and NOF__
+*Figure 3: All Rails directories broken down by their total LOC and NOF*
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-components-loc-bar.png)
 
-__Figure 4: Bar distribution of the LOC by Rails component__
+*Figure 4: Bar distribution of the LOC by Rails component*
 
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-external_component_dependencies.png)
 
+*Figure 5: Rails component dependencies*
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-external_component_dependencies-with_loc.png)
+
+*Figure 6: Rails component dependencies, Rails nodes scaled by LOC*
+
+| component | actioncable | actionmailbox | actionmailer | actionpack | actiontext | actionview | activejob | activemodel | activerecord | activestorage | activesupport | railties |
+|--------------------|--------|-----|-------|--------|-----|--------|--------|--------|--------|------|--------|--------|
+| **actioncable**    | x      | 60  | 7081  | 51645  | 76  | 31747  | 16632  | 19285  | **112008** | 210  | 70245  | 42721  |
+| **actionmailbox**  | 60     | x   | 47    | 113    | 206 | 77     | 29     | 30     | 130    | 111  | 50     | **767**    |
+| **actionmailer**   | 7081   | 47  | x     | 42215  | 41  | 18134  | 9292   | 12764  | **72305**  | 108  | 44069  | 30022  |
+| **actionpack**     | 51645  | 113 | 42215 | x      | 134 | 167056 | 67057  | 89538  | **512923** | 514  | 318181 | 202884 |
+| **actiontext**     | 76     | 206 | 41    | 134    | x   | 87     | 32     | 38     | 138    | 149  | 71     | **607**    |
+| **actionview**     | 31747  | 77  | 18134 | 167056 | 87  | x      | 40970  | 50138  | **289649** | 363  | 178098 | 105586 |
+| **activejob**      | 16632  | 29  | 9292  | 67057  | 32  | 40970  | x      | 25068  | **145045** | 166  | 90583  | 53842  |
+| **activemodel**    | 19285  | 30  | 12764 | 89538  | 38  | 50138  | 25068  | x      | **186977** | 258  | 114503 | 67524  |
+| **activerecord**   | 112008 | 130 | 72305 | **512923** | 138 | 289649 | 145045 | 186977 | x      | 1113 | 650434 | 395371 |
+| **activestorage**  | 210    | 111 | 108   | 514    | 149 | 363    | 166    | 258    | **1113**   | x    | 480    | 796    |
+| **activesupport**  | 70245  | 50  | 44069 | 318181 | 71  | 178098 | 90583  | 114503 | **650434** | 480  | x      | 244547 |
+| **railties**       | 42721  | 767 | 30022 | 202884 | 607 | 105586 | 53842  | 67524  | **395371** | 796  | 244547 | x      |
+
+*Figure 7: *
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
 
 ## Information interpretation
-
-
+_
 
 ## Conclusion
 
