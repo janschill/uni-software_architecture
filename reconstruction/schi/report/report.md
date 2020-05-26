@@ -1,23 +1,29 @@
-# Architetural reconstruction
+# Architectural reconstruction
 
 ## Introduction
 
-<!-- TODO: Introduce symphony approach maybe? -->
+This report will do a software reconstruction after the Symphony process. It will dissect the Rails framework and attempt to make logical interpretations on the architecture, functionality and complexity.
+Symphony is a software architecture reconstruction process that is heavily based on views. It is split into five steps:
+
+1. Problem elicitation
+2. Concept determination
+3. Data gathering
+4. Knowledge inference
+5. Information interpretation
+
+First the problem, that wants to be achieved, needs to be defined. After this, the information and views that might solve this problem need to be defined. When this is done, this data is being gathered and put into the views previously defined. With the abstracted information an interpretation can, be performed and hopefully a solution found.
 
 ## Problem elicitation
 
 When following an education in a computer science relevant field, students will be taught the fundamentals of computers and programming. This involves many topics as it is a complex topic. What an education most of the time does not include---for good reasons, that shall not be argued here, as this is not the focus of the report---is the work with frameworks. Frameworks are a set of reusable libraries for software systems. A popular area of computing where the number of frameworks is countless is for the development of web applications.
 These web frameworks have been built most of the time by a single person and then evolved to a code base, so complex that many developers actively maintain and expand it.
-Due to the complexity of these frameworks one focus point has been to make the intial set up and usuage as easy as possible, often being able to have a running web application within minutes. This is valuable but comes with the risk of using the framework without knowing what is actually happening.
+Due to the complexity of these frameworks one focus point has been to make the initial set up and usage as easy as possible, often being able to have a running web application within minutes. This is valuable but comes with the risk of using the framework without knowing what is actually happening.
 Documentation is a key aspect of enabling this bridge from practice to theory and vice versa.
 Another part of open-source frameworks is that they rely heavily on the community to chip in, as open-source lives from contributions from everyone. But how does one contribute to a code base that has 394,884 lines of code, increasing by the hour.
 Documentation helps here as well, but is harder to maintain, because it would have been updated with every code change, whereas the documentation of the frameworks' functionality only needs updating when a major feature gets added or updated.
 This report aims at giving a programmatic overview of the Rails framework. It will extract data straight from the repository and map it to useful statistics and graphs. Further it will outline some evolutionary analytics to see where the most changes within the project are occurring over time.
 
 ## Concept determination
-
-<!-- What architectural information is needed to solve the problem? -->
-<!-- Which viewpoints are relevant? -->
 
 Before gathering the data from the codebase, it is important to define the architectural information that is needed to solve the stated problem of gaining a better overview and understanding of Rails.
 It is also beneficial to set the viewpoints that are planned to use to show the gathered information.
@@ -69,7 +75,8 @@ directories = []
 for (dirpath, dirnames, filenames) in walk('/path/to/rails'):
     directories.extend(dirnames)
     break
-directories = list(filter(lambda x: x[0] != ".", directories)) # filter away all hidden directories
+# filter away all hidden directories
+directories = list(filter(lambda x: x[0] != ".", directories))
 ```
 
 A look inside one of those directories will give an overview of what a component actually is.
@@ -108,7 +115,7 @@ The project does not only include the Rails components but also other directorie
 - `tasks`
 - `tools`
 
-These will be iterated and every file will be looked at.
+These will be iterated, and every file will be looked at.
 
 ```python
 def get_files(path, file_extension):
@@ -222,9 +229,15 @@ The initial `get_files` function is being called when instantiating the `rails_c
 rails_components = {}
 for directory in directories:
     files = get_files(full_path('/' + directory + '/'), 'rb')
-    average_LOC = int(reduce_by_key(files.values(), 'no_lines') / len(files.values()))
-    average_NOF = int(reduce_by_key(files.values(), 'no_functions') / len(files.values()))
-    average_requires = int(reduce_by_key(files.values(), 'no_requires') / len(files.values()))
+    average_LOC = int(
+        reduce_by_key(files.values(), 'no_lines') / len(files.values())
+    )
+    average_NOF = int(
+        reduce_by_key(files.values(), 'no_functions') / len(files.values())
+    )
+    average_requires = int(
+        reduce_by_key(files.values(), 'no_requires') / len(files.values())
+    )
     dependencies = get_external_dependencies(directory)
     rails_components[directory] = {
         'files': files,
@@ -232,7 +245,11 @@ for directory in directories:
         'average_NOF': average_NOF,
         'average_requires': average_requires,
         'dependencies': dependencies }
-rails_components = {k: v for k, v in sorted(rails_components.items(), key = lambda item: item[0])}
+rails_components = {
+    k: v for k, v in sorted(
+        rails_components.items(), key = lambda item: item[0]
+    )
+}
 ```
 
 This will also add some general information, based on the gathered information about each individual component. Especially `dependencies` is of interested. The `.gemspec` file holds all the external gems that the current library depends on. This can be used to see how large the external complexity for the specific library is.
@@ -346,11 +363,23 @@ Printing some initial statistics about the Rails components with the `print` and
 
 ```python
 def print_rails_components():
-    format = "{:<15}{:<1}{:<10}{:<1}{:<7}{:<1}{:<11}{:<1}{:<14}{:<1}{:<10}{:<1}{:<10}"
-    print(format.format("Component", " | ", "Ruby files", " | ", "Ø LOC", " | ", "Ø Functions", " | ", "Ø Function LOC", " | ", "Ø Requires", " | ", "Dependencies"))
-    print('----------------+------------+---------+-------------+----------------+------------+-------------')
+    format = "{:<15}{:<1}{:<10}{:<1}{:<7}{:<1}{:<11}
+              {:<1}{:<14}{:<1}{:<10}{:<1}{:<10}"
+    print(format.format(
+        "Component", " | ", "Ruby files", " | ",
+        "Ø LOC", " | ", "Ø Functions", " | ",
+        "Ø Function LOC", " | ", "Ø Requires",
+        " | ", "Dependencies"
+    ))
+    print('----------------+------------+---------+
+        -------------+----------------+------------+-------------'
+    )
     for k, v in rails_components.items():
-        print(format.format(k, ' | ' , len(v['files']), ' | ', v['average_LOC'], ' | ', v['average_NOF'], ' | ', v['average_function_LOC'], ' | ', v['average_requires'], ' | ', len(v['dependencies'])))
+        print(format.format(k, ' | ' , len(v['files']), ' | ',
+            v['average_LOC'], ' | ', v['average_NOF'], ' | ',
+            v['average_function_LOC'], ' | ', v['average_requires'],
+            ' | ', len(v['dependencies'])
+        ))
 ```
 
 | Component      | Ruby files | Ø LOC   | Ø Functions | Ø Function LOC | Ø Requires | Dependencies|
@@ -417,25 +446,9 @@ To have an even clearer visual representation of the distribution of the number 
 
 *Figure 9: Average modification complexity recorded in the entire git history of Rails per component**
 
-| component | actioncable | actionmailbox | actionmailer | actionpack | actiontext | actionview | activejob | activemodel | activerecord | activestorage | activesupport | railties |
-|--------------------|--------|-----|-------|--------|-----|--------|--------|--------|--------|------|--------|--------|
-| **actioncable**    | x      | 60  | 7081  | 51645  | 76  | 31747  | 16632  | 19285  | **112008** | 210  | 70245  | 42721  |
-| **actionmailbox**  | 60     | x   | 47    | 113    | 206 | 77     | 29     | 30     | 130    | 111  | 50     | **767**    |
-| **actionmailer**   | 7081   | 47  | x     | 42215  | 41  | 18134  | 9292   | 12764  | **72305**  | 108  | 44069  | 30022  |
-| **actionpack**     | 51645  | 113 | 42215 | x      | 134 | 167056 | 67057  | 89538  | **512923** | 514  | 318181 | 202884 |
-| **actiontext**     | 76     | 206 | 41    | 134    | x   | 87     | 32     | 38     | 138    | 149  | 71     | **607**    |
-| **actionview**     | 31747  | 77  | 18134 | 167056 | 87  | x      | 40970  | 50138  | **289649** | 363  | 178098 | 105586 |
-| **activejob**      | 16632  | 29  | 9292  | 67057  | 32  | 40970  | x      | 25068  | **145045** | 166  | 90583  | 53842  |
-| **activemodel**    | 19285  | 30  | 12764 | 89538  | 38  | 50138  | 25068  | x      | **186977** | 258  | 114503 | 67524  |
-| **activerecord**   | 112008 | 130 | 72305 | **512923** | 138 | 289649 | 145045 | 186977 | x      | 1113 | 650434 | 395371 |
-| **activestorage**  | 210    | 111 | 108   | 514    | 149 | 363    | 166    | 258    | **1113**   | x    | 480    | 796    |
-| **activesupport**  | 70245  | 50  | 44069 | 318181 | 71  | 178098 | 90583  | 114503 | **650434** | 480  | x      | 244547 |
-| **railties**       | 42721  | 767 | 30022 | 202884 | 607 | 105586 | 53842  | 67524  | **395371** | 796  | 244547 | x      |
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-logical_coupling.png)
 
 *Figure 10: File modifications from component that occurred in the same commit*
-
-<!-- module view: nouns = nodes; verbs = dependencies/edges -->
-
 
 ## Information interpretation
 
