@@ -283,9 +283,9 @@ def handle_change_type(cc, commit, modification):
         pass
 ```
 
-Another interesting metric is the complexity of a modifitaion. This is also recorded on most of the modifications and is realized as the [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity).
+Another interesting metric is the complexity of a modification. This is also recorded on most of the modifications and is realized as the [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity).
 
-Logical coupling can be used to detect modules that may depend on each other based on their frequency of change in the same commit. One can assume when two Rails components occur in the commit history often together that they depend on each other. This is of course no true indication like an actual dependency graph would give, but still valuable as it could give indications on dependencies that are not shown on dependency graphs generated from static analysis.
+Logical coupling can be used to detect modules that may depend on each other based on their frequency of change in the same commit. One can assume when two Rails components appear in the commit history often together they depend on each other. This is of course no true indication like an actual dependency graph would give, but still valuable as it could give indications on dependencies that are not shown on dependency graphs generated from static analysis.
 
 To couple the individual Rails components, firstly the components have to defined. This can be done manually as they do not change frequently and can be easily adapted when something gets added or removed.
 
@@ -308,7 +308,7 @@ rails_components_dictionary = rails_components_dict()
 
 # Returns the Rails component from the path
 # actionmailer/lib/action_mailer.rb -> actionmailer
-def changed_component(modification):
+def get_component_from_modification(modification):
   return modification.old_path.rsplit('/')[0] or modification.new_path.rsplit('/')[0]
 
 # cc = {
@@ -322,7 +322,7 @@ def logical_coupling(path):
         changed_components = []
         for modification in commit.modifications:
             # Holds changed component
-            comp = changed_component(modification)
+            comp = get_component_from_modification(modification)
             # Check if it is a Rails component change
             if comp in rails_components():
                 changed_components.append(comp)
@@ -370,7 +370,7 @@ def print_rails_components():
 
 *Figure 1: All Rails components broken down by file*
 
-To have an even clearer visual representation of the distribution of all the files in Rails a pie chart can be used.
+To have an even clearer visual representation of the distribution of the number of files in Rails a pie chart can be used.
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-number_of_files-pie.png)
 
@@ -403,7 +403,15 @@ To have an even clearer visual representation of the distribution of all the fil
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-external_component_dependencies-with_loc.png)
 
-*Figure 6: Rails component dependencies*
+*Figure 6: Rails component dependencies scaled by their LOC*
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component.png)
+
+*Figure 7: Total file changes recorded in the entire git history of Rails per component*
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component-complexity.png)
+
+*Figure 8: Average modification complexity recorded in the entire git history of Rails per component**
 
 | component | actioncable | actionmailbox | actionmailer | actionpack | actiontext | actionview | activejob | activemodel | activerecord | activestorage | activesupport | railties |
 |--------------------|--------|-----|-------|--------|-----|--------|--------|--------|--------|------|--------|--------|
@@ -420,23 +428,22 @@ To have an even clearer visual representation of the distribution of all the fil
 | **activesupport**  | 70245  | 50  | 44069 | 318181 | 71  | 178098 | 90583  | 114503 | **650434** | 480  | x      | 244547 |
 | **railties**       | 42721  | 767 | 30022 | 202884 | 607 | 105586 | 53842  | 67524  | **395371** | 796  | 244547 | x      |
 
-*Figure 7: File modifications from component that occurred in the same commit*
+*Figure 9: File modifications from component that occurred in the same commit*
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
 
-![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component-complexity.png)
-
-*Figure 8:*
-
-![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component.png)
-
-*Figure 8:*
 
 ## Information interpretation
-_
+
+In this step the information and the views shall be interpreted and tried to make sense of with the goal of solving the stated problem.
+
+In figure 1 and figure 3 one can observe that `activerecord` is by far the largest component in the framework, making it double the size of the second largest component by lines of code and number of functions. What is interesting is, that even though it is much larger the relative sizes, like number of lines per file or per function, the number of requires is pretty much stable across all components. This is an indication for good design, as even though complexity arises it should not bring large and cluttered files with it. This indicates probably the concept of single-responsibility in classes and functions.
+Another interesting part about the extracted statistics is the low number of imports by using the `require` function. Upod further investigation in the codebase and as already mentioned the `autoload` function is being used a lot. This explains the lack of requires in the files, because most classes are being loaded in the point of entry file of each component.
+This fact and the figure show-casing the classes being loaded can be used to get brief overview of what the component might do based on the naming of those classes.
+
 
 ## Conclusion
 
-The reconstruction of Rails framework using the Symphony approach has been more or less successful. Doing the reconstruction with the purpose of gaining insights without working with stakeholders or system experts was not completely Sympohny conform, but did not block the process of the reconstruction. The reconstruction was though somewhat blocked by not being able to extract classes from the files in the Rails project. The reason for not being successful in this regard is that it was not trivial to extract the correct namespaces and classes of a file, as Ruby uses the off-side rule and modules are only used for namespacing code and the class key word then actual indicates if the file contains a class. If that would have been successful the next challenge would have been to find the dependencies of the classes to others, usually Ruby uses `require` to load files. Rails on the other hand has a function `autoload`, which has multiple implementation to support eagar loading for example. This `autoload` function is smart enough to find the correct file, by only giving it the class name. The usage of this class then would need to be tracked in all files, in order to construct a class diagram. This is very unfortunate and a lot of time was spent to first understand this and then find a solution.
+The reconstruction of Rails framework using the Symphony approach has been more or less successful. Doing the reconstruction with the purpose of gaining insights without working with stakeholders or system experts was not completely Symphony conform, but did not block the process of the reconstruction. The reconstruction was though somewhat blocked by not being able to extract classes from the files in the Rails project. The reason for not being successful in this regard is that it was not trivial to extract the correct namespaces and classes of a file, as Ruby uses the off-side rule and modules are only used for namespacing code and the class key word then actual indicates if the file contains a class. If that would have been successful the next challenge would have been to find the dependencies of the classes to others, usually Ruby uses `require` to load files. Rails on the other hand has its own dependency loader, which uses another function from Ruby's kernel, calleed `autoload`, which has multiple implementations to support eager loading for example. This `autoload` function is smart enough to find the correct file, by only giving it the class name. The usage of this class then would need to be tracked in all files, in order to construct a class diagram. This is very unfortunate and a lot of time was spent to first understand this and then find a solution.
 The final solution to use a dependency graph between the different Rails components, based on their loading from the `.gemspec` file was still satisfiable to some degree.
 The knowledge aquired through the static analysis of the complexity of the different components yielded great results as it shows, which of the components are complex and experience a lot of work, based on the number of modifications on them.
 The modifications found from the evaluation in the evolutionary analysis of the git history was also valuable.
