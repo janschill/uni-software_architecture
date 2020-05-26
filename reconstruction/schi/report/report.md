@@ -407,7 +407,7 @@ To have an even clearer visual representation of the distribution of the number 
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-actioncable-autoloads.png)
 
-*Figure 7:*
+*Figure 7: Libraries that are being loaded for `actioncable` on start up, nodes scaled by LOC*
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component.png)
 
@@ -433,6 +433,7 @@ To have an even clearer visual representation of the distribution of the number 
 | **railties**       | 42721  | 767 | 30022 | 202884 | 607 | 105586 | 53842  | 67524  | **395371** | 796  | 244547 | x      |
 
 *Figure 10: File modifications from component that occurred in the same commit*
+
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
 
 
@@ -442,7 +443,19 @@ In this step the information and the views shall be interpreted and tried to mak
 
 In figure 1 and figure 3 one can observe that `activerecord` is by far the largest component in the framework, making it double the size of the second largest component by lines of code and number of functions. What is interesting is, that even though it is much larger the relative sizes, like number of lines per file or per function, the number of requires is pretty much stable across all components. This is an indication for good design, as even though complexity arises it should not bring large and cluttered files with it. This indicates probably the concept of single-responsibility in classes and functions.
 Another interesting part about the extracted statistics is the low number of imports by using the `require` function. Upod further investigation in the codebase and as already mentioned the `autoload` function is being used a lot. This explains the lack of requires in the files, because most classes are being loaded in the point of entry file of each component.
-This fact and the figure 6 show-casing the classes being loaded can be used to get a brief overview of what the component might do based on the naming of those classes.
+This fact and the figure 7 show-casing the classes being loaded can be used to get a brief overview of what the component might do based on the naming of those classes.
+Figure 6 is one graph that was picked from all Rails components to show the idea. It shows seven dependencies that are being loaded in the beginning. Names that stand out and help to derive a sense of functionality are: `server.rb`, `remote_connections.rb`, `connection.rb`, `channel.rb`. This leads to the conclusion of it having to do with connections from client and server, also something with channels, this is most oftenly used in WebSockets, where client subscribe to channels and data then travels bidirectional between client and server.
+
+Looking at figure 5 and 6 shows the loaded external dependencies for each component. Edges are only drawn from Rails components to either external libraries or other Rails components. The external libraries' dependencies are not considered, nor their complexity by lines of source code.
+A striking fact is that `activesupport` has the most edges to other Rails components. This can be concluded as being a library with a lot of *supporting* code. A glance over an excerpt of the autoloaded classes in `activesupport` confirms this.
+
+- `Gzip`
+- `JSON`
+- `Benchmarkable`
+- `Cache`
+- `ProxyObject`
+- `KeyGenerator`
+
 
 
 ## Conclusion
