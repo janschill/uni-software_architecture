@@ -8,11 +8,11 @@
 
 When following an education in a computer science relevant field, students will be taught the fundamentals of computers and programming. This involves many topics as it is a complex topic. What an education most of the time does not include---for good reasons, that shall not be argued here, as this is not the focus of the report---is the work with frameworks. Frameworks are a set of reusable libraries for software systems. A popular area of computing where the number of frameworks is countless is for the development of web applications.
 These web frameworks have been built most of the time by a single person and then evolved to a code base, so complex that many developers actively maintain and expand it.
-Due to the complexity of these frameworks one focus point has been to make the intial set up and usuage as easy as possible, often being able to have a running web application within minutes. This is valuable, but comes with the risk of using the framework without knowing what is actually happening.
+Due to the complexity of these frameworks one focus point has been to make the intial set up and usuage as easy as possible, often being able to have a running web application within minutes. This is valuable but comes with the risk of using the framework without knowing what is actually happening.
 Documentation is a key aspect of enabling this bridge from practice to theory and vice versa.
 Another part of open-source frameworks is that they rely heavily on the community to chip in, as open-source lives from contributions from everyone. But how does one contribute to a code base that has 394,884 lines of code, increasing by the hour.
-Documentation helps here as well, but is harder to maintain, because it would have be updated with every code change, whereas the documentation of the frameworks' functionality only needs updating when a major feature gets added or updated.
-This report aims at giving a programmatic overview of the Rails framework. It will extract data straight from the repository and map it to useful statistics and graphs. Further it will outline some evolutionary analytics to see where the most changes within the project are occuring over time.
+Documentation helps here as well, but is harder to maintain, because it would have been updated with every code change, whereas the documentation of the frameworks' functionality only needs updating when a major feature gets added or updated.
+This report aims at giving a programmatic overview of the Rails framework. It will extract data straight from the repository and map it to useful statistics and graphs. Further it will outline some evolutionary analytics to see where the most changes within the project are occurring over time.
 
 ## Concept determination
 
@@ -20,9 +20,9 @@ This report aims at giving a programmatic overview of the Rails framework. It wi
 <!-- Which viewpoints are relevant? -->
 
 Before gathering the data from the codebase, it is important to define the architectural information that is needed to solve the stated problem of gaining a better overview and understanding of Rails.
-It is also benefical to set the viewpoints that are planned to use to show the gathered information.
+It is also beneficial to set the viewpoints that are planned to use to show the gathered information.
 
-From previous studies of Rails, reading the documentation or looking at the root directory of the repository, it is clear that there are several components that form Rails. Good explanations what those individual components do, can be found in the official Rails documation. Other information that would be useful that is not stated in the documentation:
+From previous studies of Rails, reading the documentation or looking at the root directory of the repository, it is clear that there are several components that form Rails. Good explanations what those individual components do, can be found in the official Rails documentation. Other information that would be useful that is not stated in the documentation:
 
 - How complex are these components?
 - How are the components connected to each other?
@@ -36,7 +36,7 @@ The concrete information that should be gathered is something like:
 - Functions per file
 - Function length
 - External dependencies per component
-- Usuage between Rails components
+- Usage between Rails components
 - Commits with their modification to files/component
 - Modification complexity
 - Logical coupling of the components
@@ -53,8 +53,8 @@ Useful viewpoints to make sense of the data would be:
 ## Data gathering
 
 In order to gather relevant information to answer the list of questions and ultimately solve the above stated problem, the Python language will be used with a few useful libraries to make the extraction of data easier.
-For the problem to solve two different sources of data will be used. Firstly the actual source code of Rails will be used and analysed, secondly the Git history will be looked at.
-The source code for Rails is hosted on GitHub and can be easily cloned. With a clone the source code will be made available locally and additionally a hidden folder `.git` is created and populated, which holds all Git relavant data---also the history, that will used. Therefore, a clone of the repository make all data needed available.
+For the problem to solve two different sources of data will be used. Firstly, the actual source code of Rails will be used and analyzed, secondly the Git history will be looked at.
+The source code for Rails is hosted on GitHub and can be easily cloned. With a clone the source code will be made available locally and additionally a hidden folder `.git` is created and populated, which holds all Git relevant data---also the history, that will used. Therefore, a clone of the repository makes all data needed available.
 
 ```bash
 $ git clone git@github.com:rails/rails.git
@@ -84,7 +84,7 @@ There has been a standard format established for the development of small librar
 
 [What is a gem? – Guides RubyGems](https://guides.rubygems.org/what-is-a-gem/)
 
-The directories give a good way to group and seperate the information gathered by gem, as the information extraction can just be done on the directories after each other and stored in a suitable data structure and as they are all in the same format adds to the convenience.
+The directories give a good way to group and separate the information gathered by gem, as the information extraction can just be done on the directories after each other and stored in a suitable data structure and as they are all in the same format adds to the convenience.
 
 Rails components:
 
@@ -254,8 +254,8 @@ def count_file_modifications_simple(path, tag):
     return commit_counts
 ```
 
-This function `count_file_modifications_simple` will count occurences of a file in the commit history, giving a good overview of the number of times a file has been changed over its history.
-This implementation has the problem that it does not differentiate between, pure changes, deletion or additions of files. In order to handle these cases the modification object gives access to: `old_path` and `new_path`.
+This function `count_file_modifications_simple` will count occurrences of a file in the commit history, giving a good overview of the number of times a file has been changed over its history.
+This implementation has the problem that it does not differentiate between, pure changes, deletion or additions of files. In order to handle these cases, the modification object gives access to: `old_path` and `new_path`.
 
 ```python
 # cc = {
@@ -285,7 +285,7 @@ def handle_change_type(cc, commit, modification):
 
 Another interesting metric is the complexity of a modification. This is also recorded on most of the modifications and is realized as the [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity).
 
-Logical coupling can be used to detect modules that may depend on each other based on their frequency of change in the same commit. One can assume when two Rails components appear in the commit history often together they depend on each other. This is of course no true indication like an actual dependency graph would give, but still valuable as it could give indications on dependencies that are not shown on dependency graphs generated from static analysis.
+Logical coupling can be used to detect modules that may depend on each other based on their frequency of change in the same commit. One can assume when two Rails components appear in the commit history often together, they depend on each other. This is of course no true indication like an actual dependency graph would give, but still valuable as it could give indications on dependencies that are not shown on dependency graphs generated from static analysis.
 
 To couple the individual Rails components, firstly the components have to defined. This can be done manually as they do not change frequently and can be easily adapted when something gets added or removed.
 
@@ -301,7 +301,7 @@ def rails_components():
     ]
 ```
 
-The original function that counts the change occurences of files can be reused, because it already loops over every commit and modification, so no reason to do it again.
+The original function that counts the change occurrences of files can be reused, because it already loops over every commit and modification, so no reason to do it again.
 
 ```python
 rails_components_dictionary = rails_components_dict()
@@ -407,7 +407,7 @@ To have an even clearer visual representation of the distribution of the number 
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-actioncable-autoloads.png)
 
-*Figure 7: Libraries that are being loaded for `actioncable` on start up, nodes scaled by LOC*
+*Figure 7: Libraries that are being loaded for `actioncable` on startup, nodes scaled by LOC*
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component.png)
 
@@ -441,10 +441,10 @@ To have an even clearer visual representation of the distribution of the number 
 
 In this step the information and the views shall be interpreted and tried to make sense of with the goal of solving the stated problem.
 
-In figure 1 and figure 3 one can observe that `activerecord` is by far the largest component in the framework, making it double the size of the second largest component by lines of code and number of functions. What is interesting is, that even though it is much larger the relative sizes, like number of lines per file or per function, the number of requires is pretty much stable across all components. This is an indication for good design, as even though complexity arises it should not bring large and cluttered files with it. This indicates probably the concept of single-responsibility in classes and functions.
-Another interesting part about the extracted statistics is the low number of imports by using the `require` function. Upod further investigation in the codebase and as already mentioned the `autoload` function is being used a lot. This explains the lack of requires in the files, because most classes are being loaded in the point of entry file of each component.
+In figure 1 and figure 3 one can observe that `activerecord` is by far the largest component in the framework, making it double the size of the second largest component by lines of code and number of functions. What is interesting is, that even though it is much larger, the relative sizes, like number of lines per file or per function, the number of requires is pretty much stable across all components. This is an indication for good design, as even though complexity arises it should not bring large and cluttered files with it. This indicates probably the concept of single responsibility in classes and functions.
+Another interesting part about the extracted statistics is the low number of imports by using the `require` function. Upon further investigation in the codebase and as already mentioned the `autoload` function is being used a lot. This explains the lack of requires in the files, because most classes are being loaded in the point of entry file of each component.
 This fact and the figure 7 show-casing the classes being loaded can be used to get a brief overview of what the component might do based on the naming of those classes.
-Figure 6 is one graph that was picked from all Rails components to show the idea. It shows seven dependencies that are being loaded in the beginning. Names that stand out and help to derive a sense of functionality are: `server.rb`, `remote_connections.rb`, `connection.rb`, `channel.rb`. This leads to the conclusion of it having to do with connections from client and server, also something with channels, this is most oftenly used in WebSockets, where client subscribe to channels and data then travels bidirectional between client and server.
+Figure 6 is one graph that was picked from all Rails components to show the idea. It shows seven dependencies that are being loaded in the beginning. Names that stand out and help to derive a sense of functionality are: `server.rb`, `remote_connections.rb`, `connection.rb`, `channel.rb`. This leads to the conclusion of it having to do with connections from client and server, also something with channels, this is most often used in WebSockets, where client subscribe to channels and data then travels bidirectional between client and server.
 
 Looking at figure 5 and 6 shows the loaded external dependencies for each component. Edges are only drawn from Rails components to either external libraries or other Rails components. The external libraries' dependencies are not considered, nor their complexity by lines of source code.
 A striking fact is that `activesupport` has the most edges to other Rails components. This can be concluded as being a library with a lot of *supporting* code. A glance over an excerpt of the autoloaded classes in `activesupport` confirms this.
@@ -456,13 +456,14 @@ A striking fact is that `activesupport` has the most edges to other Rails compon
 - `ProxyObject`
 - `KeyGenerator`
 
-
+The information from the evolutionary process only supports the previous made statements about complexity in `activerecord`. Figure 8 and 9 both have it as the the most active component by far. Figure 10 also shows that `activerecord` has its share in all components or that it is at least changed a lot.
+Interesting is that `actiontext` and `actionmailbox` do not have their strongest coupling to `activerecord`, which hints at not having any relations to the database helper component and being independet from it.
 
 ## Conclusion
 
-The reconstruction of Rails framework using the Symphony approach has been more or less successful. Doing the reconstruction with the purpose of gaining insights without working with stakeholders or system experts was not completely Symphony conform, but did not block the process of the reconstruction. The reconstruction was though somewhat blocked by not being able to extract classes from the files in the Rails project. The reason for not being successful in this regard is that it was not trivial to extract the correct namespaces and classes of a file, as Ruby uses the off-side rule and modules are only used for namespacing code and the class key word then actual indicates if the file contains a class. If that would have been successful the next challenge would have been to find the dependencies of the classes to others, usually Ruby uses `require` to load files. Rails on the other hand has its own dependency loader, which uses another function from Ruby's kernel, calleed `autoload`, which has multiple implementations to support eager loading for example. This `autoload` function is smart enough to find the correct file, by only giving it the class name. The usage of this class then would need to be tracked in all files, in order to construct a class diagram. This is very unfortunate and a lot of time was spent to first understand this and then find a solution.
+The reconstruction of Rails framework using the Symphony approach has been more or less successful. Doing the reconstruction with the purpose of gaining insights without working with stakeholders or system experts was not completely Symphony conform but did not block the process of the reconstruction. The reconstruction was though somewhat blocked by not being able to extract classes from the files in the Rails project. The reason for not being successful in this regard is that it was not trivial to extract the correct namespaces and classes of a file, as Ruby uses the off-side rule and modules are only used for *namespacing* code and the class key word then actual indicates if the file contains a class. If that would have been successful the next challenge would have been to find the dependencies of the classes to others, usually Ruby uses `require` to load files. Rails on the other hand has its own dependency loader, which uses another function from Ruby's kernel, called `autoload`, which has multiple implementations to support eager loading for example. This `autoload` function is smart enough to find the correct file, by only giving it the class name. The usage of this class then would need to be tracked in all files, in order to construct a class diagram. This is very unfortunate, and a lot of time was spent to first understand this and then find a solution.
 The final solution to use a dependency graph between the different Rails components, based on their loading from the `.gemspec` file was still satisfiable to some degree.
-The knowledge aquired through the static analysis of the complexity of the different components yielded great results as it shows, which of the components are complex and experience a lot of work, based on the number of modifications on them.
+The knowledge acquired through the static analysis of the complexity of the different components yielded great results as it shows, which of the components are complex and experience a lot of work, based on the number of modifications on them.
 The modifications found from the evaluation in the evolutionary analysis of the git history was also valuable.
 Firstly, as just mentioned, the visible number of modifications on the components, but also their average complexity let to believe that some components are more complicated as others.
 Secondly figuring out through logical coupling that some components change rather often together shows how tightly the framework is coupled together, even though it might not seem in the beginning from the lack of dependency on each other.
