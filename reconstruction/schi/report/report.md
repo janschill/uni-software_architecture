@@ -1,5 +1,8 @@
 # Architectural reconstruction
 
+Jan Schill
+schi@itu.dk
+
 ## Introduction
 
 This report will do a software reconstruction after the Symphony process. It will dissect the Rails framework and attempt to make logical interpretations on the architecture, functionality and complexity.
