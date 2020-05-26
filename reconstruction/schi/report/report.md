@@ -403,7 +403,7 @@ To have an even clearer visual representation of the distribution of all the fil
 
 ![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-external_component_dependencies-with_loc.png)
 
-*Figure 6: Rails component dependencies, Rails nodes scaled by LOC*
+*Figure 6: Rails component dependencies*
 
 | component | actioncable | actionmailbox | actionmailer | actionpack | actiontext | actionview | activejob | activemodel | activerecord | activestorage | activesupport | railties |
 |--------------------|--------|-----|-------|--------|-----|--------|--------|--------|--------|------|--------|--------|
@@ -420,8 +420,16 @@ To have an even clearer visual representation of the distribution of all the fil
 | **activesupport**  | 70245  | 50  | 44069 | 318181 | 71  | 178098 | 90583  | 114503 | **650434** | 480  | x      | 244547 |
 | **railties**       | 42721  | 767 | 30022 | 202884 | 607 | 105586 | 53842  | 67524  | **395371** | 796  | 244547 | x      |
 
-*Figure 7: *
+*Figure 7: File modifications from component that occurred in the same commit*
 <!-- module view: nouns = nodes; verbs = dependencies/edges -->
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component-complexity.png)
+
+*Figure 8:*
+
+![](https://github.com/janschill/uni-software_architecture/raw/master/reconstruction/schi/report/images/rails-git-modifications-component.png)
+
+*Figure 8:*
 
 ## Information interpretation
 _
